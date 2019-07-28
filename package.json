@@ -1,0 +1,13 @@
+{
+	"private": true,
+	"name": "timber",
+	"version": "0.1.0",
+	"scripts": {
+		"install": "pnpm i -r --filter=timber.*",
+		"serve": "pnpm run -r serve --filter=timber.*",
+		"serve:dev": "pnpm run -r serve:dev --filter=timber.*"
+	},
+	"devDependencies": {
+		"pnpm": "^3.6.0"
+	}
+}

@@ -1,0 +1,41 @@
+{
+	"private": true,
+	"name": "timber.api",
+	"version": "0.1.0",
+	"scripts": {
+		"serve": "ts-node ./src",
+		"serve:dev": "DEBUG=* ts-node-dev ./src"
+	},
+	"dependencies": {
+		"axios": "^0.19.0",
+		"bcrypt": "^3.0.6",
+		"body-parser": "^1.19.0",
+		"cors": "^2.8.5",
+		"debug": "^4.1.1",
+		"express": "^4.17.1",
+		"jsonwebtoken": "^8.5.1",
+		"passport": "^0.4.0",
+		"passport-jwt": "^4.0.0",
+		"passport-local": "^1.0.0",
+		"passport-strategy": "^1.0.0",
+		"pouchdb": "^7.1.1"
+	},
+	"devDependencies": {
+		"@types/bcrypt": "^3.0.0",
+		"@types/body-parser": "^1.17.0",
+		"@types/cors": "^2.8.5",
+		"@types/debug": "^4.1.4",
+		"@types/express": "^4.17.0",
+		"@types/express-serve-static-core": "^4.16.7",
+		"@types/jsonwebtoken": "^8.3.2",
+		"@types/node": "^12.6.6",
+		"@types/passport": "^1.0.0",
+		"@types/passport-jwt": "^3.0.1",
+		"@types/passport-local": "^1.0.33",
+		"@types/passport-strategy": "^0.2.35",
+		"@types/pouchdb": "^6.4.0",
+		"ts-node": "^8.3.0",
+		"ts-node-dev": "^1.0.0-pre.40",
+		"tslint": "^5.18.0"
+	}
+}

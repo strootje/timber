@@ -1,0 +1,6 @@
+/node_modules
+/api/node_modules
+/pwa/node_modules
+/api/certs
+/docs
+/dist

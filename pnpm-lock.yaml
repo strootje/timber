@@ -1,0 +1,13 @@
+devDependencies:
+  pnpm: 3.6.0
+lockfileVersion: 5.1
+packages:
+  /pnpm/3.6.0:
+    dev: true
+    engines:
+      node: '>=8.15'
+    hasBin: true
+    resolution:
+      integrity: sha512-tjBYCFDvnGdA/FHlOfLn4WZ2Iy1JO8GRFem0RkbtbKO91Z9Jz8v2oYQYkMspY7/7lCBbjQA8+eUatTUu3d6eqw==
+specifiers:
+  pnpm: ^3.6.0
