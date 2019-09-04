@@ -1,28 +1,16 @@
-import Axios from 'axios';
 import { h, render } from 'preact';
-import PromiseWindow = require('promise-window');
+import Router from 'preact-router';
+import { BalancesScene } from './frontend/scenes/BalancesScene';
+import { HomeScene } from './frontend/scenes/HomeScene';
+import { TransactionsScene } from './frontend/scenes/TransactionsScene';
 
-// tslint:disable: no-console
-const authorize = async () => {
-	try {
-		const response = await Axios.post<{ token: string }>('http://0.0.0.0:3010/me/login', { username: 'strootje', password: 'test' });
-		await Axios.get('http://0.0.0.0:3010/api/test', {
-			headers: {
-				Authorization: `JWT ${response.data.token}`
-			}
-		});
-
-		const window = new PromiseWindow('http://0.0.0.0:3010/authorize/ing?token=' + response.data.token, {
-			windowName: 'authorize ING'
-		});
-
-		const result = await window.open();
-		console.log(`result: ${result}`);
-	} catch (e) {
-		console.log(`error: ${e}`);
-	}
-};
+// tslint:disable-next-line: no-var-requires
+require('./frontend/assets/styles/index.scss');
 
 render((
-	<button onClick={authorize}>authorize:ing</button>
+	<Router>
+		<BalancesScene path='/balances' />
+		<TransactionsScene path='/balances/:id/transactions' />
+		<HomeScene path='/' default />
+	</Router>
 ), document.body);

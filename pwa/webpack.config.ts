@@ -1,4 +1,5 @@
 import * as HtmlPlugin from 'html-webpack-plugin';
+import * as CssPlugin from 'mini-css-extract-plugin';
 import PathsPlugin from 'tsconfig-paths-webpack-plugin';
 import { Configuration } from 'webpack';
 import { DistDir, Extensions, PwaSrcDir } from '../util/Paths';
@@ -42,6 +43,16 @@ export default (): Configuration => ({
 				use: [
 					{ loader: 'ts-loader' }
 				]
+			},
+
+			{
+				test: /.*\.scss$/,
+				use: [
+					CssPlugin.loader,
+					{ loader: 'css-loader' },
+					{ loader: 'sass-loader', options: {
+						sourceMap: true }}
+				]
 			}
 		]
 	},
@@ -49,6 +60,10 @@ export default (): Configuration => ({
 	plugins: [
 		new HtmlPlugin({
 			filename: DistDir('index.html')
+		}),
+
+		new CssPlugin({
+			filename: 'css/[name].bundle.css'
 		})
 	]
 });

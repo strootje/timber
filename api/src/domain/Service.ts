@@ -1,4 +1,7 @@
 export interface Service {
-	refreshToken: string;
+	scope: string;
 	accessToken: string;
+	accessTokenExpiresAt: Date;
+	refreshToken: string;
+	refreshTokenExpiresAt: Date;
 }

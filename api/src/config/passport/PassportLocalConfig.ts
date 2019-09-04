@@ -11,14 +11,12 @@ export const PassportLocalConfig = (passport: PassportStatic) => {
 	const opts: IStrategyOptions = {
 	};
 
-	passport.use(new Strategy(opts, (username, password, done) => {
+	passport.use(new Strategy(opts, async (username, password, done) => {
 		const pouch = new PouchDb(PouchDbConfig.uri);
 
-		pouch.get<User>(username)
-
-		// user found
-		.then(async (user: User) => {
-			logger('got user');
+		try {
+			const user = await pouch.get<User>(username);
+			logger('found user');
 
 			if (!user.logins.local) {
 				throw new Error('user does not have a password');
@@ -30,20 +28,15 @@ export const PassportLocalConfig = (passport: PassportStatic) => {
 				throw new Error('user password does not match');
 			}
 
-			return user;
-		}).then((user: User) => {
 			logger('passwords match');
 			done(null, { username: user.username });
-		})
-
-		// user not found
-		.catch(async (err: string) => {
-			logger('caucht error: %o', err);
+		} catch (err) {
 			if (err === 'user.password does not match') {
 				return;
 			}
 
 			try {
+				logger('creating new user');
 				const hashed = await hash(password, 10);
 				await pouch.put<User>({ _id: username, username, logins: { local: { hash: hashed }}, services: {} });
 
@@ -51,6 +44,6 @@ export const PassportLocalConfig = (passport: PassportStatic) => {
 			} catch (e) {
 				done(e);
 			}
-		});
+		}
 	}));
 };

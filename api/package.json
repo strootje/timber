@@ -4,7 +4,7 @@
 	"version": "0.1.0",
 	"scripts": {
 		"serve": "ts-node ./src",
-		"serve:dev": "DEBUG=* ts-node-dev ./src"
+		"serve:dev": "DEBUG=timber:* ts-node-dev ./src"
 	},
 	"dependencies": {
 		"axios": "^0.19.0",

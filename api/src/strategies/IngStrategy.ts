@@ -4,6 +4,7 @@ import * as Debug from 'debug';
 import { Request } from 'express-serve-static-core';
 import { OutgoingHttpHeaders } from 'http';
 import { Agent } from 'https';
+import { AuthenticateOptions } from 'passport';
 import { Strategy } from 'passport-strategy';
 import { stringify } from 'querystring';
 import { format, parse } from 'url';
@@ -22,7 +23,17 @@ export type IngScope =
 	| 'virtual-ledger-accounts:fund-reservation:delete'
 	| 'virtual-ledger-accounts:balance:view';
 
-export type VerifyFunction = (req: Request, accessToken: string) => Promise<void>;
+export interface IngAccessTokenResponse {
+	scope: string;
+	token_type: 'Bearer';
+	access_token: string;
+	expires_in: number;
+	refresh_token: string;
+	refresh_token_expires_in: number;
+}
+
+export type CheckReqForTokensFunction = (req: Request) => Promise<IngAccessTokenResponse | null>;
+export type VerifyFunction = (req: Request, accessToken: IngAccessTokenResponse) => Promise<void>;
 export interface IngStrategyOptions {
 	clientId: string;
 	clientKey?: string;
@@ -46,12 +57,13 @@ export class IngStrategy extends Strategy {
 	private readonly signingCertificate?: string;
 	private readonly signingCertificateKey: string;
 	private readonly signingCertificateKeyPassphrase: string;
+	private readonly checkReqForTokens: CheckReqForTokensFunction;
 	private readonly verify: VerifyFunction;
 	private readonly clientId: string;
 	private readonly clientKey?: string;
 	private readonly client: AxiosInstance;
 
-	constructor(opts: IngStrategyOptions, verify: VerifyFunction) {
+	constructor(opts: IngStrategyOptions, checkReqForTokens: CheckReqForTokensFunction, verify: VerifyFunction) {
 		super();
 
 		this.useSandbox = !!opts.useSandbox;
@@ -59,6 +71,7 @@ export class IngStrategy extends Strategy {
 		this.signingCertificate = opts.signingCertificate;
 		this.signingCertificateKey = opts.signingCertificateKey;
 		this.signingCertificateKeyPassphrase = opts.signingCertificateKeyPassphrase;
+		this.checkReqForTokens = checkReqForTokens;
 		this.verify = verify;
 		this.clientId = opts.clientId;
 		this.clientKey = opts.clientKey;
@@ -72,7 +85,7 @@ export class IngStrategy extends Strategy {
 		});
 	}
 
-	public authenticate(req: Request, opts?: any) {
+	public async authenticate(req: Request, opts?: AuthenticateOptions) {
 		if (req.query && req.query.error) {
 			if (req.query.error === 'access_denied') {
 				return this.fail({ message: req.query.error_description }, 401);
@@ -82,19 +95,35 @@ export class IngStrategy extends Strategy {
 			}
 		}
 
-		if (req.query && req.query.code) {
-			this.getAppAccessToken()
-			.then((accessToken) => this.getCustAccessToken(accessToken, req.query.code))
-			.then((accessToken) => this.verify(req, accessToken))
-			.then(() => {
+		try {
+			// check for existing tokens
+			const tokens = await this.checkReqForTokens(req);
+			if (!tokens && opts && opts.authInfo) {
+				this.fail('no tokens found', 403);
+			} else if (tokens) {
+				if (new Date(tokens.expires_in) >= new Date()) {
+					const accessToken = await this.getAppAccessToken();
+					const data = await this.refreshCustAccessToken(accessToken, tokens.refresh_token);
+					await this.verify(req, data);
+				}
+
 				this.success({}, {});
-			});
-		} else {
-			this.getAppAccessToken()
-			.then((accessToken) => this.getAuthorizePath(accessToken, { ...opts, token: req.query.token }))
-			.then((authorizeUrl) => {
+
+			// handle callback
+			} else if (req.query && req.query.code) {
+				const accessToken = await this.getAppAccessToken();
+				const data = await this.getCustAccessToken(accessToken, req.query.code);
+				await this.verify(req, data);
+				this.success({}, {});
+
+			// handle initial authorize call
+			} else {
+				const accessToken = await this.getAppAccessToken();
+				const authorizeUrl = await this.getAuthorizePath(accessToken, { ...opts, token: req.query.token });
 				this.redirect(authorizeUrl);
-			});
+			}
+		} catch (e) {
+			this.error(e);
 		}
 	}
 
@@ -110,7 +139,7 @@ export class IngStrategy extends Strategy {
 		const signature = this.createAppSignature('post', path, date, digest);
 
 		const headers: OutgoingHttpHeaders = {
-			'Authorization': `Signature keyId="${this.clientId}",algorithm="rsa-sha256",headers="(request-target) date digest x-ing-reqid",signature="${signature}"`,
+			'Authorization': `Signature keyId="${this.clientId}",algorithm="rsa-sha256",headers="(request-target) date digest",signature="${signature}"`,
 			'Content-Type': 'application/x-www-form-urlencoded',
 			'Date': date,
 			'Digest': digest
@@ -158,7 +187,7 @@ export class IngStrategy extends Strategy {
 		return response.location;
 	}
 
-	private async getCustAccessToken(accessToken: string, code: string): Promise<string> {
+	private async getCustAccessToken(accessToken: string, code: string): Promise<IngAccessTokenResponse> {
 		const params: OutgoingHttpHeaders = {
 			code,
 			grant_type: 'authorization_code',
@@ -180,8 +209,33 @@ export class IngStrategy extends Strategy {
 		};
 
 		logger('params in <AccessToken>: %o, %o, %o, %o', params, path, date, headers);
-		const response = await this.post<{ access_token: string }>(path, headers, body);
-		return response.access_token;
+		const response = await this.post<IngAccessTokenResponse>(path, headers, body);
+		return response;
+	}
+
+	private async refreshCustAccessToken(appAccessToken: string, refreshToken: string): Promise<IngAccessTokenResponse> {
+		const params: OutgoingHttpHeaders = {
+			refresh_token: refreshToken,
+			grant_type: 'refresh_token'
+		};
+
+		const body = stringify(params);
+		const digest = `SHA-256=${createHash('sha256').update(body).digest('base64')}`;
+		const path = IngStrategy.tokenPath;
+		const date = new Date().toUTCString();
+		const signature = this.createAppSignature('post', path, date, digest);
+
+		const headers: OutgoingHttpHeaders = {
+			'Authorization': `Bearer ${appAccessToken}`,
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'Date': date,
+			'Digest': digest,
+			'Signature': `keyId="${this.clientId}",algorithm="rsa-sha256",headers="(request-target) date digest",signature="${signature}"`
+		};
+
+		logger('params in <RefreshToken>: %o, %o, %o, %o', params, path, date, headers);
+		const response = await this.post<IngAccessTokenResponse>(path, headers, body);
+		return response;
 	}
 
 	private async get<TResult>(path: string, headers: OutgoingHttpHeaders): Promise<TResult> {
@@ -219,17 +273,4 @@ export class IngStrategy extends Strategy {
 
 		return hash;
 	}
-
-	// private createCustSignature(method: string, path: string, date: string, digest: string, reqId: string): string {
-	// 	const url = parse(path);
-	// 	const signingString = `(request-target): ${method} ${url.pathname || ''}${url.query ? `?${url.query}` : ''}\ndate: ${date}\ndigest: ${digest}\nx-request-id: ${reqId}`;
-
-	// 	logger('params in <AppSignature>: %o', signingString);
-	// 	const hash = createSign('sha256').update(signingString).sign({
-	// 		key: this.signingCertificateKey,
-	// 		passphrase: this.signingCertificateKeyPassphrase
-	// 	}, 'base64');
-
-	// 	return hash;
-	// }
 }

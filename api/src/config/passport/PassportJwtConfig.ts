@@ -27,6 +27,7 @@ export const PassportJwtConfig = (passport: PassportStatic) => {
 
 	passport.use(new Strategy(opts, (payload: User, done) => {
 		const pouch = new PouchDb(PouchDbConfig.uri);
+
 		pouch.get<User>(payload.username)
 			.then(async (user: User) => done(null, user))
 			.catch((err: Error) => done(err, null));
