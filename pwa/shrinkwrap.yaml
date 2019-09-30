@@ -20,6 +20,7 @@ devDependencies:
   ts-loader: 6.0.4
   tsconfig-paths-webpack-plugin: 3.2.0
   tslint: 5.18.0
+  typescript: 3.6.3
   webpack: 4.39.2
   webpack-cli: 3.3.7
   webpack-dev-server: 3.8.0
@@ -5103,6 +5104,13 @@ packages:
     dev: true
     resolution:
       integrity: sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
+  /typescript/3.6.3:
+    dev: true
+    engines:
+      node: '>=4.2.0'
+    hasBin: true
+    resolution:
+      integrity: sha512-N7bceJL1CtRQ2RiG0AQME13ksR7DiuQh/QehubYcghzv20tnh+MQnQIuJddTmsbqYj+dztchykemz0zFzlvdQw==
   /uglify-js/3.4.10:
     dependencies:
       commander: 2.19.0
@@ -5591,6 +5599,7 @@ specifiers:
   ts-loader: ^6.0.4
   tsconfig-paths-webpack-plugin: ^3.2.0
   tslint: ^5.18.0
+  typescript: ^3.6.3
   webpack: ^4.35.3
   webpack-cli: ^3.3.6
   webpack-dev-server: ^3.7.2

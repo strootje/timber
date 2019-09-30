@@ -10,6 +10,7 @@
 	},
 	"devDependencies": {
 		"pnpm": "^3.6.0",
-		"sonar-scanner": "^3.1.0"
+		"sonar-scanner": "^3.1.0",
+		"typescript": "^3.6.3"
 	}
 }

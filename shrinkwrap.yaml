@@ -1,6 +1,7 @@
 devDependencies:
   pnpm: 3.7.3
   sonar-scanner: 3.1.0
+  typescript: 3.6.3
 packages:
   /pnpm/3.7.3:
     dev: true
@@ -15,9 +16,17 @@ packages:
     requiresBuild: true
     resolution:
       integrity: sha1-UcHBEB9UuYq8XYVlIJsdkjKXk0M=
+  /typescript/3.6.3:
+    dev: true
+    engines:
+      node: '>=4.2.0'
+    hasBin: true
+    resolution:
+      integrity: sha512-N7bceJL1CtRQ2RiG0AQME13ksR7DiuQh/QehubYcghzv20tnh+MQnQIuJddTmsbqYj+dztchykemz0zFzlvdQw==
 registry: 'https://registry.npmjs.org/'
 shrinkwrapMinorVersion: 9
 shrinkwrapVersion: 3
 specifiers:
   pnpm: ^3.6.0
   sonar-scanner: ^3.1.0
+  typescript: ^3.6.3
