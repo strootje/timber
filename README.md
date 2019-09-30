@@ -1,5 +1,8 @@
 # Timber
 
+## Errors...
+Errors met linked preact-bulma-components komt door symlink issues
+
 ## Startup
 
 Install deps: `pnpm run install`

@@ -3,8 +3,8 @@ import { readFileSync } from 'fs';
 import { PassportStatic } from 'passport';
 import * as PouchDb from 'pouchdb';
 import { ApiDir } from '../../../../util/Paths';
+import { IngAccessTokenResponse, IngStrategy } from '../../../modules/passport-ing';
 import { User } from '../../domain/User';
-import { IngAccessTokenResponse, IngStrategy } from '../../strategies/IngStrategy';
 import { PouchDbConfig } from '../PouchDbConfig';
 
 export const PassportIngConfig = (passport: PassportStatic) => {

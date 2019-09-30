@@ -1,0 +1,6 @@
+{
+	"sonarlint.connectedMode.project": {
+		"serverId": "sonarcloud",
+		"projectKey": "strootje_timber"
+	}
+}

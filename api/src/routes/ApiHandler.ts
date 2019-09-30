@@ -19,9 +19,3 @@ Names.forEach((bankId) => {
 		});
 	});
 });
-
-
-// ApiHandler.get('/:bankId/*', (req: Request, res: Response) => {
-// 	logger('request %s', req.path);
-// 	res.status(200).json({ message: 'nothing here yet' });
-// });

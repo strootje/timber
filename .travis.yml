@@ -1,0 +1,20 @@
+language: node_js
+node_js: lts/*
+
+cache:
+  npm: true
+  directories:
+  - $HOME/.pnpm-store/
+
+before_install:
+- curl -L https://unpkg.com/@pnpm/self-installer | node
+
+install:
+- pnpm i
+
+script:
+- echo define more scripts..
+- pnpm run build
+
+script:
+  - pnpm run code:scanner

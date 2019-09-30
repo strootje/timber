@@ -261,9 +261,13 @@ export class IngStrategy extends Strategy {
 		}
 	}
 
-	private createAppSignature(method: string, path: string, date: string, digest: string): string {
+	private createAppSignature(method: string, path: string, date: string, digest: string, reqId?: string): string {
 		const url = parse(path);
-		const signingString = `(request-target): ${method} ${url.pathname || ''}${url.query ? `?${url.query}` : ''}\ndate: ${date}\ndigest: ${digest}`;
+		let signingString = `(request-target): ${method} ${url.pathname || ''}${url.query ? `?${url.query}` : ''}\ndate: ${date}\ndigest: ${digest}`;
+
+		if (reqId) {
+			signingString += `\nx-request-id: ${reqId}`;
+		}
 
 		logger('params in <AppSignature>: %o', signingString);
 		const hash = createSign('sha256').update(signingString).sign({

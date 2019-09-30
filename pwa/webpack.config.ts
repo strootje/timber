@@ -27,6 +27,7 @@ export default (): Configuration => ({
 
 	resolve: {
 		extensions: Extensions,
+		// symlinks: isProd,
 
 		plugins: [
 			new PathsPlugin({
