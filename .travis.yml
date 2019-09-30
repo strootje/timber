@@ -10,8 +10,11 @@ before_install:
 - curl -L https://unpkg.com/@pnpm/self-installer | node
 
 install:
-- pnpm i --global typescript
 - pnpm i
+
+after_install:
+- echo $NODE_PATH
+- export NODE_PATH=./node_modules
 
 script:
 - echo define more scripts..
