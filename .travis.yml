@@ -12,7 +12,7 @@ before_install:
 install:
 - pnpm i
 
-after_install:
+before_script:
 - echo $NODE_PATH
 - export NODE_PATH=./node_modules
 
