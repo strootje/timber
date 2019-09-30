@@ -10,6 +10,7 @@ before_install:
 - curl -L https://unpkg.com/@pnpm/self-installer | node
 
 install:
+- pnpm i --global typescript
 - pnpm i
 
 script:
