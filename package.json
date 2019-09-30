@@ -9,6 +9,7 @@
 		"serve:dev": "pnpm run -r serve:dev --filter=timber.*"
 	},
 	"devDependencies": {
-		"pnpm": "^3.6.0"
+		"pnpm": "^3.6.0",
+		"sonar-scanner": "^3.1.0"
 	}
 }
