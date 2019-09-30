@@ -17,4 +17,4 @@ script:
 - pnpm run build
 
 script:
-- pnpm run code:scanner
+- pnpm run code:scanner -- -Dsonar.login=$SONAR_TOKEN
